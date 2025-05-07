@@ -1,6 +1,7 @@
 import asyncio 
 import websockets
 import datetime
+import random
 
 # Función para estblecer el formato del mensaje con la hora y el remitente
 def formato_mensaje(remitente, mensaje):
@@ -25,8 +26,14 @@ async def cliente():
 
     nombre = input("👉 Escribe tu nombre de usuario: ") 
     if not nombre.strip():
-        print("❌ Debes proporcionar un nombre de usuario para conectarte.")
-        return  
+
+        #Si no escribe ningun nombre de usuario, se asigna uno aleatorio : "Usuario" + "numero random"
+        numRandom= random.randint(100, 999)
+        nombre = f"Usuario_{numRandom}"
+        print(f"Se te asigno automaticamente el nombre de : {nombre}")
+
+        #print("❌ Debes proporcionar un nombre de usuario para conectarte.")
+        #return  
 
     # Establece la conexión WebSocket con el servidor
     async with websockets.connect(uri) as websocket:
