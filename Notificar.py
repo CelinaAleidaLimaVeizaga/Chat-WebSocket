@@ -1,48 +1,49 @@
-import socket
-import threading
+import asyncio
+import websockets
 
-# Lista para almacenar conexiones activas
-clientes = []
-nombres = []
+clientes = set()
+nombres = {}  # Asocia cada websocket a su nombre
 
-def notificar_a_todos(mensaje):
-    for cliente in clientes:
-        cliente.send(mensaje.encode('utf-8'))
+async def manejar_cliente(websocket):
+    print("🔌 Cliente conectado")
+    clientes.add(websocket)
 
-def manejar_cliente(cliente):
-    nombre = cliente.recv(1024).decode('utf-8')
-    nombres.append(nombre)
-    clientes.append(cliente)
+    try:
+        # Espera el primer mensaje como nombre de usuario
+        nombre = await websocket.recv()
+        nombres[websocket] = nombre
 
-    notificar_a_todos(f"{nombre} se ha unido")
+        # Notifica a todos que el usuario se ha unido
+        mensaje_union = f"🔔 {nombre} se ha unido al chat"
+        await notificar_a_todos(mensaje_union)
 
-    while True:
-        try:
-            mensaje = cliente.recv(1024)
-            if not mensaje:
-                break
-        except:
-            break
+        # Escucha los mensajes normalmente
+        async for mensaje in websocket:
+            print("📩 Mensaje recibido:", mensaje)
+            for cliente in clientes:
+                await cliente.send(mensaje)
 
-    clientes.remove(cliente)
-    nombres.remove(nombre)
-    cliente.close()
-    notificar_a_todos(f"{nombre} se ha desconectado")
+    except websockets.exceptions.ConnectionClosed:
+        print("⚠️ Cliente desconectado inesperadamente")
 
-def iniciar_servidor():
-    servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    servidor.bind(('127.0.0.1', 55555))
-    servidor.listen()
+    finally:
+        clientes.remove(websocket)
+        nombre = nombres.get(websocket, "Usuario desconocido")
+        nombres.pop(websocket, None)
 
-    print("Servidor corriendo en 127.0.0.1:55555...")
+        # Notifica a todos que el usuario se fue
+        mensaje_salida = f"👋 {nombre} se ha desconectado"
+        await notificar_a_todos(mensaje_salida)
 
-    while True:
-        cliente, direccion = servidor.accept()
-        hilo = threading.Thread(target=manejar_cliente, args=(cliente,))
-        hilo.start()
+        print(f"👋 Cliente '{nombre}' desconectado")
 
-iniciar_servidor()
+async def notificar_a_todos(mensaje):
+    if clientes:
+        await asyncio.gather(*(cliente.send(mensaje) for cliente in clientes))
 
+async def iniciar_servidor():
+    server = await websockets.serve(manejar_cliente, "localhost", 6790)
+    print("🚀 Servidor WebSocket en ws://localhost:6790")
+    await server.wait_closed()
 
 asyncio.run(iniciar_servidor())
-
