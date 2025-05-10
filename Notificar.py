@@ -1,39 +1,48 @@
-# servidor.py
-import asyncio
-import websockets
+import socket
+import threading
 
-clientes = {}  # websocket: nombre_usuario
+# Lista para almacenar conexiones activas
+clientes = []
+nombres = []
 
-async def manejar_cliente(websocket):
-    try:
-        nombre = await websocket.recv()  # Primer mensaje es el nombre de usuario
-        clientes[websocket] = nombre
-        mensaje_conexion = f"{nombre} se ha unido"
-        print("🔔", mensaje_conexion)
-        await notificar_a_todos(mensaje_conexion)
+def notificar_a_todos(mensaje):
+    for cliente in clientes:
+        cliente.send(mensaje.encode('utf-8'))
 
-        async for mensaje in websocket:
-            print(f"📩 Mensaje de {nombre}: {mensaje}")
-            await notificar_a_todos(mensaje)
+def manejar_cliente(cliente):
+    nombre = cliente.recv(1024).decode('utf-8')
+    nombres.append(nombre)
+    clientes.append(cliente)
 
-    except websockets.exceptions.ConnectionClosed:
-        pass
-    finally:
-        if websocket in clientes:
-            nombre = clientes[websocket]
-            del clientes[websocket]
-            mensaje_salida = f"{nombre} se ha desconectado"
-            print("🔕", mensaje_salida)
-            await notificar_a_todos(mensaje_salida)
+    notificar_a_todos(f"{nombre} se ha unido")
 
-async def notificar_a_todos(mensaje):
-    if clientes:
-        await asyncio.gather(*(ws.send(mensaje) for ws in clientes))
+    while True:
+        try:
+            mensaje = cliente.recv(1024)
+            if not mensaje:
+                break
+        except:
+            break
 
-async def iniciar_servidor():
-    server = await websockets.serve(manejar_cliente, "localhost", 6790)
-    print("🚀 Servidor WebSocket en ws://localhost:6790")
-    await server.wait_closed()
+    clientes.remove(cliente)
+    nombres.remove(nombre)
+    cliente.close()
+    notificar_a_todos(f"{nombre} se ha desconectado")
+
+def iniciar_servidor():
+    servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    servidor.bind(('127.0.0.1', 55555))
+    servidor.listen()
+
+    print("Servidor corriendo en 127.0.0.1:55555...")
+
+    while True:
+        cliente, direccion = servidor.accept()
+        hilo = threading.Thread(target=manejar_cliente, args=(cliente,))
+        hilo.start()
+
+iniciar_servidor()
+
 
 asyncio.run(iniciar_servidor())
 
