@@ -22,7 +22,8 @@ def color_mensaje(remitente, mensaje, es_cliente):
 
 # Función principal que gestiona la conexión WebSocket y el chat
 async def cliente():
-    uri = "ws://localhost:6790" 
+    #uri = "ws://localhost:6790"
+    uri = "wss://chat-websocket-sis-colab.onrender.com"
 
     nombre = input("👉 Escribe tu nombre de usuario: ") 
     if not nombre.strip():
