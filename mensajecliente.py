@@ -17,7 +17,7 @@ def mostrar_historial():
 
 async def cliente_historial():
     uri = "ws://localhost:6790"
-    print("🟢 Cliente visualizador conectado al historial")
+    print(" Cliente visualizador conectado al historial")
     async with websockets.connect(uri) as websocket:
         try:
             async for mensaje in websocket:
@@ -25,7 +25,7 @@ async def cliente_historial():
                 historial.append(entrada)
                 mostrar_historial()
         except websockets.exceptions.ConnectionClosed:
-            print("❌ Conexión cerrada por el servidor")
+            print(" Conexión cerrada por el servidor")
 
 asyncio.run(cliente_historial())
 
