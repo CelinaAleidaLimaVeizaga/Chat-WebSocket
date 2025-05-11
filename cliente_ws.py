@@ -1,9 +1,10 @@
-import asyncio 
+import asyncio
 import websockets
 import datetime
 import random
+import sys  # Para usar sys.exit() y salir del programa
 
-# Función para estblecer el formato del mensaje con la hora y el remitente
+# Función para establecer el formato del mensaje con la hora y el remitente
 def formato_mensaje(remitente, mensaje):
     hora = datetime.datetime.now().strftime("%H:%M:%S") 
     return f"[{hora}] {remitente}: {mensaje}"
@@ -26,14 +27,10 @@ async def cliente():
 
     nombre = input("👉 Escribe tu nombre de usuario: ") 
     if not nombre.strip():
-
-        #Si no escribe ningun nombre de usuario, se asigna uno aleatorio : "Usuario" + "numero random"
-        numRandom= random.randint(100, 999)
+        # Si no escribe ningún nombre de usuario, se asigna uno aleatorio
+        numRandom = random.randint(100, 999)
         nombre = f"Usuario_{numRandom}"
-        print(f"Se te asigno automaticamente el nombre de : {nombre}")
-
-        #print("❌ Debes proporcionar un nombre de usuario para conectarte.")
-        #return  
+        print(f"Se te asignó automáticamente el nombre de: {nombre}")
 
     # Establece la conexión WebSocket con el servidor
     async with websockets.connect(uri) as websocket:
@@ -57,7 +54,8 @@ async def cliente():
                 mensaje = await loop.run_in_executor(None, input, f"{nombre}: ")  # Solicita un mensaje al usuario
                 if mensaje.lower() == "salir":  # Si el usuario escribe "salir", termina la conexión
                     print("🚪 Cerrando conexión...")
-                    break
+                    await websocket.close()  # Cierra la conexión WebSocket
+                    sys.exit()  # Termina el programa
                 mensaje_formateado = formato_mensaje("Tú", mensaje)  # Formatea el mensaje con la hora
                 print(f"{mensaje_formateado}")  # Muestra el mensaje antes de enviarlo
                 await websocket.send(f"{nombre}: {mensaje}")  # Envía el mensaje al servidor WebSocket
