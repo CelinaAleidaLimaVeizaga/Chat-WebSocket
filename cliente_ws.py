@@ -48,7 +48,7 @@ async def cliente():
                 print(color_mensaje("Tú", mensaje, es_cliente=True))
             else:
                 print(color_mensaje("Otro Usuario", mensaje, es_cliente=False))
-    except websockets.exceptions.ConnectionClosed:
+    except websockets.exceptions.ConnectionClosed: # Si la conexión se cierra, muestra un error
         print(" Conexión cerrada por el servidor")
 
 
