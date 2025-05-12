@@ -1,4 +1,5 @@
 import asyncio
+import os
 import websockets
 
 clientes = set()
@@ -18,8 +19,9 @@ async def manejar_cliente(websocket):
         print("👋 Cliente desconectado")
 
 async def iniciar_servidor():
-    server = await websockets.serve(manejar_cliente, "localhost", 6790)
-    print("🚀 Servidor WebSocket en wss://chat-websocket-sis-colab.onrender.com")
+    puerto = os.getenv('PORT', 5000)
+    server = await websockets.serve(manejar_cliente, "0.0.0.0", int(puerto))
+    print(f"🚀 Servidor WebSocket en ws://0.0.0.0:{puerto}")
     await server.wait_closed()
 
 asyncio.run(iniciar_servidor())
