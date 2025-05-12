@@ -39,17 +39,15 @@ async def cliente():
         # Función para recibir mensajes de otros usuarios
         async def recibir():
             try:
-                async for mensaje in websocket:
-                    if mensaje.startswith("__NOTIF__"):
-                        # Mostrar mensaje de sistema sin usuario
-                        mensaje_sistema = mensaje.replace("__NOTIF__", "")
-                        print(f"\033[93m[{datetime.datetime.now().strftime('%H:%M:%S')}] {mensaje_sistema}\033[0m")
-                    elif mensaje.startswith(f"{nombre}:"):
+                async for mensaje in websocket:  # Escucha los mensajes del servidor
+                    if mensaje.startswith(f"{nombre}:"):  # Si el mensaje es del cliente, se destaca
                         print(color_mensaje("Tú", mensaje, es_cliente=True))
-                    else:
+                    else:  # Los mensajes de otros usuarios se muestran de forma diferente
                         print(color_mensaje("Otro Usuario", mensaje, es_cliente=False))
-            except websockets.exceptions.ConnectionClosed:
-                print("Conexión cerrada por el servidor")
+            except websockets.exceptions.ConnectionClosed:  # Si la conexión se cierra, muestra un error
+                print(" Conexión cerrada por el servidor")
+
+
 
         # Función para enviar mensajes al servidor
         async def enviar():
