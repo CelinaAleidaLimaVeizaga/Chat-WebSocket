@@ -16,7 +16,7 @@ def mostrar_historial():
     print("=============================\n")
 
 async def cliente_historial():
-    uri = "ws://localhost:6790"
+    uri = "wss://chat-websocket-sis-colab.onrender.com"
     print("🟢 Cliente visualizador conectado al historial")
     async with websockets.connect(uri) as websocket:
         try:
@@ -28,4 +28,3 @@ async def cliente_historial():
             print("❌ Conexión cerrada por el servidor")
 
 asyncio.run(cliente_historial())
-

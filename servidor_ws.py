@@ -19,7 +19,7 @@ async def manejar_cliente(websocket):
 
 async def iniciar_servidor():
     server = await websockets.serve(manejar_cliente, "localhost", 6790)
-    print("🚀 Servidor WebSocket en ws://localhost:6790")
+    print("🚀 Servidor WebSocket en wss://chat-websocket-sis-colab.onrender.com")
     await server.wait_closed()
 
 asyncio.run(iniciar_servidor())
