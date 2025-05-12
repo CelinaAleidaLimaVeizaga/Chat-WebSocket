@@ -1,22 +1,33 @@
+
 import asyncio
 import os
 import websockets
 
-clientes = set()
+clientes = {}  # Diccionario para asociar websockets con nombres de usuario
 
 async def manejar_cliente(websocket):
-    print("🔌 Cliente conectado")
-    clientes.add(websocket)
     try:
+        nombre = await websocket.recv()  # Espera recibir el nombre de usuario
+        clientes[websocket] = nombre
+        print(f" {nombre} se ha conectado")
+
+        # Notificar a todos que un nuevo usuario se ha unido
+        await notificar_todos(f" {nombre} se ha unido al chat")
+
         async for mensaje in websocket:
-            print("📩 Mensaje recibido:", mensaje)
-            for cliente in clientes:
-                await cliente.send(mensaje)
+            print(f" {nombre} dice: {mensaje}")
+            await notificar_todos(mensaje)
     except websockets.exceptions.ConnectionClosed:
-        print("⚠️ Cliente desconectado inesperadamente")
+        nombre = clientes.get(websocket, "Usuario desconocido")
+        print(f" {nombre} se ha desconectado inesperadamente")
     finally:
-        clientes.remove(websocket)
-        print("👋 Cliente desconectado")
+        # Notificar a todos que el usuario se ha desconectado
+        nombre = clientes.pop(websocket, "Usuario desconocido")
+        await notificar_todos(f" {nombre} se ha desconectado")
+
+async def notificar_todos(mensaje):
+    if clientes:
+        await asyncio.gather(*(cliente.send(mensaje) for cliente in clientes))
 
 async def iniciar_servidor():
     puerto = os.getenv('PORT', 5000)

@@ -25,6 +25,6 @@ async def cliente_historial():
                 historial.append(entrada)
                 mostrar_historial()
         except websockets.exceptions.ConnectionClosed:
-            print("❌ Conexión cerrada por el servidor")
+            print(" Conexión cerrada por el servidor")
 
 asyncio.run(cliente_historial())
