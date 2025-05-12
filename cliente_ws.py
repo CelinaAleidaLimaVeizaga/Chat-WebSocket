@@ -39,8 +39,8 @@ async def cliente():
         # Función para recibir mensajes de otros usuarios
         async def recibir():
     try:
-        async for mensaje in websocket:
-            if mensaje.startswith("__NOTIF__"):
+        async for mensaje in websocket: # Escucha los mensajes del servidor
+            if mensaje.startswith("__NOTIF__"): 
                 # Mostrar mensaje de sistema sin usuario
                 mensaje_sistema = mensaje.replace("__NOTIF__", "")
                 print(f"\033[93m[{datetime.datetime.now().strftime('%H:%M:%S')}] {mensaje_sistema}\033[0m")
