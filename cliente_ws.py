@@ -25,7 +25,7 @@ def color_mensaje(remitente, mensaje, es_cliente):
 async def cliente():
     uri = "ws://localhost:6790" 
 
-    nombre = input(" Escribe tu nombre de usuario: ") 
+    nombre = input("Escribe tu nombre de usuario: ") 
     if not nombre.strip():
         # Si no escribe ningún nombre de usuario, se asigna uno aleatorio
         numRandom = random.randint(100, 999)
@@ -34,23 +34,22 @@ async def cliente():
 
     # Establece la conexión WebSocket con el servidor
     async with websockets.connect(uri) as websocket:
-        print(f" Conectado como {nombre}") 
+        print(f"Conectado como {nombre}") 
 
         # Función para recibir mensajes de otros usuarios
         async def recibir():
-    try:
-        async for mensaje in websocket:
-            if mensaje.startswith("__NOTIF__"):
-                # Mostrar mensaje de sistema sin usuario
-                mensaje_sistema = mensaje.replace("__NOTIF__", "")
-                print(f"\033[93m[{datetime.datetime.now().strftime('%H:%M:%S')}] {mensaje_sistema}\033[0m")
-            elif mensaje.startswith(f"{nombre}:"):
-                print(color_mensaje("Tú", mensaje, es_cliente=True))
-            else:
-                print(color_mensaje("Otro Usuario", mensaje, es_cliente=False))
-    except websockets.exceptions.ConnectionClosed:
-        print(" Conexión cerrada por el servidor")
-
+            try:
+                async for mensaje in websocket:
+                    if mensaje.startswith("__NOTIF__"):
+                        # Mostrar mensaje de sistema sin usuario
+                        mensaje_sistema = mensaje.replace("__NOTIF__", "")
+                        print(f"\033[93m[{datetime.datetime.now().strftime('%H:%M:%S')}] {mensaje_sistema}\033[0m")
+                    elif mensaje.startswith(f"{nombre}:"):
+                        print(color_mensaje("Tú", mensaje, es_cliente=True))
+                    else:
+                        print(color_mensaje("Otro Usuario", mensaje, es_cliente=False))
+            except websockets.exceptions.ConnectionClosed:
+                print("Conexión cerrada por el servidor")
 
         # Función para enviar mensajes al servidor
         async def enviar():
@@ -58,12 +57,12 @@ async def cliente():
             while True:
                 mensaje = await loop.run_in_executor(None, input, f"{nombre}: ")  # Solicita un mensaje al usuario
                 if mensaje.lower() == "salir":  # Si el usuario escribe "salir", termina la conexión
-                    print(" Cerrando conexión...")
+                    print("Cerrando conexión...")
                     await websocket.close()  # Cierra la conexión WebSocket
                     sys.exit()  # Termina el programa
                 mensaje_formateado = formato_mensaje("Tú", mensaje)  # Formatea el mensaje con la hora
                 print(f"{mensaje_formateado}")  # Muestra el mensaje antes de enviarlo
-                await websocket.send(f"{nombre}: {mensaje}")  # Envía el mensaje al servidor WebSocket
+                await websocket.send(f"{nombre}: {mensaje}")  # Envía el mensaje al servidor WebSocketgi 
 
         # Ejecuta las funciones de recibir y enviar mensajes simultáneamente
         await asyncio.gather(recibir(), enviar())

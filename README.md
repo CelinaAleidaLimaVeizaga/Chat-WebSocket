@@ -15,8 +15,7 @@ Primero, asegúrate de instalar las dependencias necesarias. Abre una terminal o
 
 ```bash
 pip install websockets
-
-
+```
 ### Instrucciones de uso:
 
 1. **Instalar dependencias**: 
